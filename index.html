@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正在跳转...</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(76, 175, 80, 0.2);
+      border-top-color: #4CAF50;
+      border-radius: 50%;
+      margin: 0 auto 30px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    .loading-spinner.visible {
+      display: block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .timeout-section {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: none;
+    }
+
+    .timeout-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+    }
+
+    .timeout-message {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+
+    .redirect-button {
+      background-color: #4CAF50;
+      color: #ffffff;
+      border: none;
+      padding: 14px 40px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      font-weight: 500;
+    }
+
+    .redirect-button:hover {
+      background-color: #45a049;
+    }
+
+    .redirect-button:active {
+      transform: scale(0.98);
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+      }
+    }
+
+    .redirect-button.pulse {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="loading-spinner" id="loadingSpinner"></div>
+    <h1 id="mainTitle">正在为您跳转</h1>
+    <p class="subtitle" id="subTitle">请稍候，页面即将跳转...</p>
+    
+    <div class="timeout-section" id="timeoutSection">
+      <p class="timeout-message" id="timeoutMessage">跳转时间较长？点击下方按钮手动跳转</p>
+      <button class="redirect-button pulse" id="redirectButton">手动跳转</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var config = {
+        targetUrl: 'https://github.com/wuzhidemao',
+        autoRedirectDelay: 0,
+        timeoutMs: 5000,
+        pageTitle: '正在跳转...',
+        mainTitle: '正在为您跳转',
+        subTitle: '请稍候，页面即将跳转...',
+        timeoutMessage: '跳转时间较长？点击下方按钮手动跳转',
+        buttonText: '手动跳转',
+        backgroundColor: '#f5f5f5',
+        textColor: '#333333',
+        buttonBgColor: '#4CAF50',
+        buttonTextColor: '#ffffff',
+        buttonHoverColor: '#45a049',
+        showLoadingAnimation: true,
+        loadingColor: '#4CAF50'
+      };
+
+      var redirected = false;
+
+      function doRedirect() {
+        if (redirected) return;
+        redirected = true;
+        window.location.replace(config.targetUrl);
+      }
+
+      function applyConfig() {
+        document.title = config.pageTitle;
+        document.body.style.backgroundColor = config.backgroundColor;
+        document.body.style.color = config.textColor;
+        
+        document.getElementById('mainTitle').textContent = config.mainTitle;
+        document.getElementById('subTitle').textContent = config.subTitle;
+        document.getElementById('timeoutMessage').textContent = config.timeoutMessage;
+        
+        var btn = document.getElementById('redirectButton');
+        btn.textContent = config.buttonText;
+        btn.style.backgroundColor = config.buttonBgColor;
+        btn.style.color = config.buttonTextColor;
+        
+        var style = document.createElement('style');
+        style.textContent = `
+          .redirect-button:hover {
+            background-color: ${config.buttonHoverColor} !important;
+          }
+          .loading-spinner {
+            border-top-color: ${config.loadingColor};
+          }
+          @keyframes pulse {
+            0%, 100% {
+              box-shadow: 0 0 0 0 ${config.buttonBgColor}66;
+            }
+            50% {
+              box-shadow: 0 0 0 10px ${config.buttonBgColor}00;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+
+        if (config.showLoadingAnimation) {
+          document.getElementById('loadingSpinner').classList.add('visible');
+        }
+      }
+
+      function showManualButton() {
+        if (redirected) return;
+        document.getElementById('timeoutSection').classList.add('visible');
+      }
+
+      function init() {
+        applyConfig();
+
+        document.getElementById('redirectButton').addEventListener('click', doRedirect);
+
+        setTimeout(function() {
+          doRedirect();
+        }, config.autoRedirectDelay);
+
+        setTimeout(function() {
+          showManualButton();
+        }, config.timeoutMs);
+      }
+
+      fetch('config.json', { cache: 'no-store' })
+        .then(function(response) {
+          if (!response.ok) throw new Error('加载配置文件失败');
+          return response.json();
+        })
+        .then(function(data) {
+          for (var key in data) {
+            if (key.indexOf('//') !== 0 && config.hasOwnProperty(key)) {
+              config[key] = data[key];
+            }
+          }
+        })
+        .catch(function(err) {
+          console.warn('使用默认配置:', err.message);
+        })
+        .finally(function() {
+          init();
+        });
+    })();
+  </script>
+</body>
+</html>
