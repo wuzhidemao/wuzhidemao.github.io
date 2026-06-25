@@ -39,7 +39,7 @@
   "buttonHoverColor": "#45a049",
 
   "// 是否显示加载动画": "true=显示加载动画，false=不显示",
-  "showLoadingAnimation": true,
+  "showLoadingAnimation": false,
 
   "// 加载动画颜色": "加载动画的颜色",
   "loadingColor": "#4CAF50"
